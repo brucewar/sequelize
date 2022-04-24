@@ -350,6 +350,9 @@ class Sequelize {
       case 'snowflake':
         Dialect = require('./dialects/snowflake');
         break;
+      case 'dm':
+        Dialect = require('./dialects/dmdb');
+        break;
       default:
         throw new Error(`The dialect ${this.getDialect()} is not supported. Supported dialects: mssql, mariadb, mysql, postgres, db2 and sqlite.`);
     }
@@ -629,7 +632,7 @@ class Sequelize {
       checkTransaction();
 
       const connection = await (options.transaction ? options.transaction.connection : this.connectionManager.getConnection(options));
-      
+
       if (this.options.dialect === 'db2' && options.alter) {
         if (options.alter.drop === false) {
           connection.dropTable = false;
