@@ -127,7 +127,7 @@ class Query extends AbstractQuery {
         ) {
           const startId = data[this.getInsertIdField()];
           result = [];
-          for (let i = startId; i < startId + data.affectedRows; i++) {
+          for (let i = startId; i < startId + data.rowsAffected; i++) {
             result.push({ [this.model.rawAttributes[this.model.primaryKeyAttribute].field]: i });
           }
         } else {
@@ -185,7 +185,7 @@ class Query extends AbstractQuery {
       return data[0];
     }
     if (this.isBulkUpdateQuery() || this.isBulkDeleteQuery()) {
-      return data.affectedRows;
+      return data.rowsAffected;
     }
     if (this.isVersionQuery()) {
       const version = data.rows[0].BANNER;
@@ -195,10 +195,10 @@ class Query extends AbstractQuery {
       return data;
     }
     if (this.isUpsertQuery()) {
-      return [result, data.affectedRows === 1];
+      return [result, data.rowsAffected === 1];
     }
     if (this.isInsertQuery() || this.isUpdateQuery()) {
-      return [result, data.affectedRows];
+      return [result, data.rowsAffected];
     }
     if (this.isShowConstraintsQuery()) {
       return data;

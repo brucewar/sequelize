@@ -582,6 +582,97 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
   quoteIdentifier(identifier, force) {
     return Utils.addTicks(Utils.removeTicks(identifier, '`'), '"');
   }
+
+  /**
+   * Returns an insert into command for multiple values.
+   *
+   * @param {string} tableName
+   * @param {object} fieldValueHashes
+   * @param {object} options
+   * @param {object} fieldMappedAttributes
+   *
+   * @private
+   */
+  bulkInsertQuery(tableName, fieldValueHashes, options, fieldMappedAttributes) {
+    options = options || {};
+    fieldMappedAttributes = fieldMappedAttributes || {};
+
+    const tuples = [];
+    const serials = {};
+    let allAttributes = [];
+    let onDuplicateKeyUpdate = '';
+
+    for (const fieldValueHash of fieldValueHashes) {
+      _.forOwn(fieldValueHash, (value, key) => {
+        if (!allAttributes.includes(key)) {
+          allAttributes.push(key);
+        }
+        if (
+          fieldMappedAttributes[key]
+          && fieldMappedAttributes[key].autoIncrement === true
+        ) {
+          serials[key] = true;
+        }
+      });
+    }
+    allAttributes = allAttributes.filter(key => !serials[key]);
+
+    for (const fieldValueHash of fieldValueHashes) {
+      const values = allAttributes.map(key => {
+        if (
+          this._dialect.supports.bulkDefault
+          && serials[key] === true
+        ) {
+          // fieldValueHashes[key] ?? 'DEFAULT'
+          return fieldValueHash[key] != null ? fieldValueHash[key] : 'DEFAULT';
+        }
+
+        return this.escape(fieldValueHash[key], fieldMappedAttributes[key], { context: 'INSERT' });
+      });
+
+      tuples.push(`(${values.join(',')})`);
+    }
+
+    // `options.updateOnDuplicate` is the list of field names to update if a duplicate key is hit during the insert.  It
+    // contains just the field names.  This option is _usually_ explicitly set by the corresponding query-interface
+    // upsert function.
+    if (this._dialect.supports.inserts.updateOnDuplicate && options.updateOnDuplicate) {
+      if (this._dialect.supports.inserts.updateOnDuplicate == ' ON CONFLICT DO UPDATE SET') { // postgres / sqlite
+        // If no conflict target columns were specified, use the primary key names from options.upsertKeys
+        const conflictKeys = options.upsertKeys.map(attr => this.quoteIdentifier(attr));
+        const updateKeys = options.updateOnDuplicate.map(attr => `${this.quoteIdentifier(attr)}=EXCLUDED.${this.quoteIdentifier(attr)}`);
+        onDuplicateKeyUpdate = ` ON CONFLICT (${conflictKeys.join(',')}) DO UPDATE SET ${updateKeys.join(',')}`;
+      } else { // mysql / maria
+        const valueKeys = options.updateOnDuplicate.map(attr => `${this.quoteIdentifier(attr)}=VALUES(${this.quoteIdentifier(attr)})`);
+        onDuplicateKeyUpdate = `${this._dialect.supports.inserts.updateOnDuplicate} ${valueKeys.join(',')}`;
+      }
+    }
+
+    const ignoreDuplicates = options.ignoreDuplicates ? this._dialect.supports.inserts.ignoreDuplicates : '';
+    const attributes = allAttributes.map(attr => this.quoteIdentifier(attr)).join(',');
+    const onConflictDoNothing = options.ignoreDuplicates ? this._dialect.supports.inserts.onConflictDoNothing : '';
+    let returning = '';
+
+    if (this._dialect.supports.returnValues && options.returning) {
+      const returnValues = this.generateReturnValues(fieldMappedAttributes, options);
+
+      returning += returnValues.returningFragment;
+    }
+
+    return Utils.joinSQLFragments([
+      'INSERT',
+      ignoreDuplicates,
+      'INTO',
+      this.quoteTable(tableName),
+      `(${attributes})`,
+      'VALUES',
+      tuples.join(','),
+      onDuplicateKeyUpdate,
+      onConflictDoNothing,
+      returning,
+      ';'
+    ]);
+  }
 }
 
 // private methods
