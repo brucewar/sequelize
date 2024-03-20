@@ -354,7 +354,7 @@ class Sequelize {
         Dialect = require('./dialects/dmdb');
         break;
       default:
-        throw new Error(`The dialect ${this.getDialect()} is not supported. Supported dialects: mssql, mariadb, mysql, postgres, db2 and sqlite.`);
+        throw new Error(`The dialect ${this.getDialect()} is not supported. Supported dialects: mssql, mariadb, mysql, dm, postgres, db2 and sqlite.`);
     }
 
     this.dialect = new Dialect(this);

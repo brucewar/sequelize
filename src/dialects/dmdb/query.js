@@ -10,7 +10,7 @@ const ER_DEADLOCK = 1213;
 const ER_ROW_IS_REFERENCED = 1451;
 const ER_NO_REFERENCED_ROW = 1452;
 
-const debug = logger.debugContext('sql:mysql');
+const debug = logger.debugContext('sql:dm');
 
 class Query extends AbstractQuery {
   constructor(connection, sequelize, options) {
