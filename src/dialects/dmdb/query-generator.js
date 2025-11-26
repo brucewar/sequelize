@@ -719,7 +719,6 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
 
   escapeAttributes(attributes, options, mainTableAs) {
     return attributes && attributes.map(attr => {
-      attr = Array.isArray(attr) ? attr : [attr, attr];
       let addTable = true;
       if (attr instanceof Utils.SequelizeMethod) {
         return this.handleSequelizeMethod(attr);
@@ -743,7 +742,7 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
         }
         attr = [attr[0], this.quoteIdentifier(alias)].join(' AS ');
       } else {
-        attr = !attr.includes(Utils.TICK_CHAR) && !attr.includes('"') ? this.quoteAttribute(attr, options.model) : this.escape(attr);
+        attr = !attr.includes(Utils.TICK_CHAR) && !attr.includes('"') ? attr : this.escape(attr);
       }
       if (!_.isEmpty(options.include) && (!attr.includes('.') || options.dotNotation) && addTable) {
         attr = `${mainTableAs}.${attr}`;
