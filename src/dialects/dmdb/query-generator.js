@@ -1229,7 +1229,7 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
 
         if (topLevelInfo.subQuery) {
           const dbIdentifier = `${this.quoteIdentifier(tableName)}.${fieldLeft}`;
-          subqueryAttributes.push(dbIdentifier !== joinOn ? `${dbIdentifier} AS ${this.quoteIdentifier(attrLeft)}` : dbIdentifier);
+          subqueryAttributes.push(dbIdentifier !== joinOn ? `${dbIdentifier} AS ${this.quoteIdentifier(attrLeft)}` : `${dbIdentifier} AS ${this.quoteIdentifier(fieldLeft)}`);
         }
       } else {
         const joinSource = `${asLeft.replace(/->/g, '.')}.${attrLeft}`;
