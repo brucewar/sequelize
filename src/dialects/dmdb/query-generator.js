@@ -1216,7 +1216,7 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
     if (!asLeft) asLeft = parent.as || parent.model.name;
     else asRight = `${asLeft}->${asRight}`;
 
-    let joinOn = `${this.quoteIdentifier(asLeft)}.${fieldLeft}`;
+    let joinOn = `${this.quoteTable(this.quoteIdentifier(asLeft))}.${fieldLeft}`;
     const subqueryAttributes = [];
 
     if (topLevelInfo.options.groupedLimit && parentIsTop || topLevelInfo.subQuery && include.parent.subQuery && !include.subQuery) {
@@ -1225,7 +1225,7 @@ class DMDBQueryGenerator extends AbstractQueryGenerator {
         const tableName = this.quoteTable(parent.as || parent.model.name);
 
         // Check for potential aliased JOIN condition
-        joinOn = this._getAliasForField(tableName, attrLeft, topLevelInfo.options) || `${this.quoteIdentifier(tableName)}.${attrLeft}`;
+        joinOn = this._getAliasForField(tableName, attrLeft, topLevelInfo.options) || `${this.quoteIdentifier(tableName)}.${this.quoteIdentifier(attrLeft)}`;
 
         if (topLevelInfo.subQuery) {
           const dbIdentifier = `${this.quoteIdentifier(tableName)}.${fieldLeft}`;
