@@ -370,8 +370,11 @@ class Sequelize {
       case 'goldendb':
         Dialect = require('./dialects/goldendb');
         break;
+      case 'gbase':
+        Dialect = require('./dialects/gbase');
+        break;
       default:
-        throw new Error(`The dialect ${this.getDialect()} is not supported. Supported dialects: mssql, mariadb, mysql, dm, kingbase8, goldendb, oracle, postgres, db2 and sqlite.`);
+        throw new Error(`The dialect ${this.getDialect()} is not supported. Supported dialects: mssql, mariadb, mysql, dm, kingbase8, goldendb, gbase, oracle, postgres, db2 and sqlite.`);
     }
 
     this.dialect = new Dialect(this);

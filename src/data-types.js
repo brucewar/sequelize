@@ -1064,6 +1064,7 @@ dialectMap.oracle = require('./dialects/oracle/data-types')(DataTypes);
 dialectMap.dm = require('./dialects/dmdb/data-types')(DataTypes);
 dialectMap.kingbase8 = require('./dialects/kingbase8/data-types')(DataTypes);
 dialectMap.goldendb = require('./dialects/goldendb/data-types')(DataTypes);
+dialectMap.gbase = require('./dialects/gbase/data-types')(DataTypes);
 
 const dialectList = Object.values(dialectMap);
 
