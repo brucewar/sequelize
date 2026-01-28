@@ -938,7 +938,7 @@ class PostgresQueryGenerator extends AbstractQueryGenerator {
       // characters, they must always be double-quoted. This makes it
       // impossible to write queries in portable SQL if tables are created in
       // this way. Hence, we strip quotes if we don't want case sensitivity.
-      return Utils.addTicks(rawIdentifier, '"');
+      return Utils.addTicks(rawIdentifier, '`');
     }
     return rawIdentifier;
   }
